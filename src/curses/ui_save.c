@@ -35,7 +35,7 @@
 #include <ctype.h>
 #include "ui_save.h"
 #include "setting.h"
-#include "capture.h"
+#include "capture/capture.h"
 #include "filter.h"
 
 /**

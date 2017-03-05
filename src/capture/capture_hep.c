@@ -46,8 +46,8 @@
 #include <netdb.h>
 #include <unistd.h>
 #include <pcap.h>
-#include "capture_eep.h"
-#include "util.h"
+#include "capture/capture_hep.h"
+#include "util/util.h"
 #include "setting.h"
 
 capture_eep_config_t eep_cfg = { 0 };

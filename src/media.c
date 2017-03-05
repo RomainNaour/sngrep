@@ -31,7 +31,7 @@
 #include <stdlib.h>
 #include "media.h"
 #include "rtp.h"
-#include "util.h"
+#include "util/util.h"
 
 sdp_media_t *
 media_create(struct sip_msg *msg)

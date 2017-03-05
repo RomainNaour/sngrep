@@ -29,7 +29,7 @@
 #include "config.h"
 #include <assert.h>
 #include <string.h>
-#include "hash.h"
+#include "util/hash.h"
 
 int main ()
 {

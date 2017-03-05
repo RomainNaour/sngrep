@@ -54,7 +54,7 @@
  *
  */
 #include "config.h"
-#include "vector.h"
+#include "util/vector.h"
 #include "sip.h"
 #include "ui_manager.h"
 #include "ui_stats.h"

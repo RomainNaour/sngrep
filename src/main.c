@@ -33,14 +33,14 @@
 #include <ctype.h>
 #include <getopt.h>
 #include "option.h"
-#include "vector.h"
-#include "capture.h"
-#include "capture_eep.h"
+#include "util/vector.h"
+#include "capture/capture.h"
+#include "capture/capture_hep.h"
 #ifdef WITH_GNUTLS
-#include "capture_gnutls.h"
+#include "packet/packet_tls_gnutls.h"
 #endif
 #ifdef WITH_OPENSSL
-#include "capture_openssl.h"
+#include "packet/packet_tls_openssl.h"
 #endif
 #include "curses/ui_manager.h"
 

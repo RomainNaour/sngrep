@@ -31,10 +31,10 @@
  */
 
 #include <unistd.h>
-#include "capture.h"
-#include "capture_openssl.h"
+#include "capture/capture.h"
+#include "packet/packet_tls_openssl.h"
 #include "option.h"
-#include "util.h"
+#include "util/util.h"
 #include "sip.h"
 
 struct SSLConnection *connections;

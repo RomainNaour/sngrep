@@ -33,7 +33,7 @@
 #define __SNGREP_RTP_H
 
 #include "config.h"
-#include "capture.h"
+#include "capture/capture.h"
 #include "media.h"
 
 // Version is the first 2 bits of the first octet

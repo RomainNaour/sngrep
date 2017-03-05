@@ -31,7 +31,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include "setting.h"
-#include "util.h"
+#include "util/util.h"
 
 
 //! Available configurable settings

@@ -34,7 +34,7 @@
 #include <locale.h>
 #include "setting.h"
 #include "ui_manager.h"
-#include "capture.h"
+#include "capture/capture.h"
 #include "ui_call_list.h"
 #include "ui_call_flow.h"
 #include "ui_call_raw.h"

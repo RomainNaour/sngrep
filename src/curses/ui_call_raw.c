@@ -34,7 +34,7 @@
 #include "ui_manager.h"
 #include "ui_call_raw.h"
 #include "ui_save.h"
-#include "capture.h"
+#include "capture/capture.h"
 
 /**
  * Ui Structure definition for Call Raw panel

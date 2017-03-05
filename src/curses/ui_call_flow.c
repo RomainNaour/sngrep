@@ -29,14 +29,14 @@
 #include "config.h"
 #include <stdlib.h>
 #include <string.h>
-#include "capture.h"
+#include "capture/capture.h"
 #include "ui_manager.h"
 #include "ui_call_flow.h"
 #include "ui_call_raw.h"
 #include "ui_msg_diff.h"
 #include "ui_save.h"
-#include "util.h"
-#include "vector.h"
+#include "util/util.h"
+#include "util/vector.h"
 #include "option.h"
 
 /***

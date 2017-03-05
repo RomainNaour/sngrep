@@ -34,7 +34,7 @@
 #include <time.h>
 #include "rtp.h"
 #include "sip.h"
-#include "vector.h"
+#include "util/vector.h"
 
 /**
  * @brief Known RTP encodings

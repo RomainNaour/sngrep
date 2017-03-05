@@ -31,10 +31,10 @@
 
 #include "config.h"
 #include <stdarg.h>
-#include "vector.h"
+#include "util/vector.h"
 #include "media.h"
 #include "sip_attr.h"
-#include "util.h"
+#include "util/util.h"
 
 //! Shorter declaration of sip_msg structure
 typedef struct sip_msg sip_msg_t;

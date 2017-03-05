@@ -34,7 +34,7 @@
 #include <ctype.h>
 #include "option.h"
 #include "filter.h"
-#include "capture.h"
+#include "capture/capture.h"
 #include "ui_manager.h"
 #include "ui_call_list.h"
 #include "ui_call_flow.h"

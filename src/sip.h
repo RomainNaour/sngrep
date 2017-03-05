@@ -39,8 +39,8 @@
 #include <pcre.h>
 #endif
 #include "sip_call.h"
-#include "vector.h"
-#include "hash.h"
+#include "util/vector.h"
+#include "util/hash.h"
 
 #define MAX_SIP_PAYLOAD 10240
 

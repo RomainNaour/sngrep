@@ -34,7 +34,7 @@
 #define __SNGREP_GROUP_H_
 
 #include "config.h"
-#include "vector.h"
+#include "util/vector.h"
 #include "sip.h"
 
 //! Shorter declaration of sip_call_group structure

@@ -7,11 +7,13 @@ src/sngrep
 tests/test-*.log
 tests/test-*.trs
 tests/test-???
-*/*.o
+*.o
 */.deps
 *gmon.out
 src/config.h*
 src/stamp-h1
+.deps
+.dirstamp
 
 .autotools
 Makefile

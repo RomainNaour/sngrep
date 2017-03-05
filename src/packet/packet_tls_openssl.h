@@ -52,7 +52,7 @@
 #include <openssl/err.h>
 #include <openssl/evp.h>
 #include <openssl/hmac.h>
-#include "capture.h"
+#include "capture/capture.h"
 
 //! Cast two bytes into decimal (Big Endian)
 #define UINT16_INT(i) ((i.x[0] << 8) | i.x[1])

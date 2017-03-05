@@ -7,9 +7,9 @@ test_003_SOURCES=test_003.c
 test_004_SOURCES=test_004.c
 test_005_SOURCES=test_005.c
 test_006_SOURCES=test_006.c
-test_007_SOURCES=test_007.c ../src/vector.c ../src/util.c
+test_007_SOURCES=test_007.c ../src/util/vector.c ../src/util/util.c
 test_008_SOURCES=test_008.c
 test_009_SOURCES=test_009.c
-test_010_SOURCES=test_010.c ../src/hash.c
+test_010_SOURCES=test_010.c ../src/util/hash.c
 
 TESTS = $(check_PROGRAMS)

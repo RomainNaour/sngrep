@@ -40,7 +40,7 @@
 #include <sys/types.h>
 #include <pcap.h>
 #include "address.h"
-#include "vector.h"
+#include "util/vector.h"
 
 //! Stored packet types
 enum packet_type {

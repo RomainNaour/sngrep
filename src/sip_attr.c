@@ -32,7 +32,7 @@
 #include <stdarg.h>
 #include "option.h"
 #include "sip_attr.h"
-#include "util.h"
+#include "util/util.h"
 #include "curses/ui_manager.h"
 
 static sip_attr_hdr_t attrs[SIP_ATTR_COUNT] = {

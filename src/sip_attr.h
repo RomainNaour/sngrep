@@ -30,7 +30,7 @@
 #define __SNGREP_SIP_ATTR_H
 
 #include "config.h"
-#include "vector.h"
+#include "util/vector.h"
 
 //! Max attribute length
 #define SIP_ATTR_MAXLEN 255

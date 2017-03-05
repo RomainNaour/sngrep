@@ -29,8 +29,8 @@
  * This file include the functions that uses libpcap to do so.
  *
  */
-#ifndef __SNGREP_CAPTURE_H
-#define __SNGREP_CAPTURE_H
+#ifndef __SNGREP_CAPTURE_PCAP_H
+#define __SNGREP_CAPTURE_PCAP_H
 
 #include "config.h"
 #include <pthread.h>
@@ -74,8 +74,8 @@
 #include <netinet/tcp.h>
 #include <netinet/udp.h>
 #include <stdbool.h>
-#include "packet.h"
-#include "vector.h"
+#include "packet/packet.h"
+#include "util/vector.h"
 
 //! Max allowed packet assembled size
 #define MAX_CAPTURE_LEN 20480
@@ -86,14 +86,6 @@
 #ifndef ETHERTYPE_8021Q
 #define ETHERTYPE_8021Q 0x8100
 #endif
-
-//! Define Websocket Transport codes
-#define WH_FIN      0x80
-#define WH_RSV      0x70
-#define WH_OPCODE   0x0F
-#define WH_MASK     0x80
-#define WH_LEN      0x7F
-#define WS_OPCODE_TEXT 0x1
 
 //! Capture modes
 enum capture_status {
@@ -223,67 +215,6 @@ capture_offline(const char *infile, const char *outfile);
  */
 void
 parse_packet(u_char *capinfo, const struct pcap_pkthdr *header, const u_char *packet);
-
-/**
- * @brief Reassembly capture IP fragments
- *
- * This function will try to assemble received PCAP data into a single IP packet.
- * It will return a packet structure if no fragmentation is found or a full packet
- * has been assembled.
- *
- * @note We assume packets higher than MAX_CAPTURE_LEN won't be SIP. This has been
- * done to avoid reassembling too big packets, that aren't likely to be interesting
- * for sngrep.
- *
- * TODO
- * Assembly only works when all of the IP fragments are received in the good order.
- * Properly check memory boundaries during packet reconstruction.
- * Implement a way to timeout pending IP fragments after some time.
- * TODO
- *
- * @param capinfo Packet capture session information
- * @para header Header received from libpcap callback
- * @para packet Packet contents received from libpcap callback
- * @param size Packet size (not including Layer and Network headers)
- * @param caplen Full packet size (current fragment -> whole assembled packet)
- * @return a Packet structure when packet is not fragmented or fully reassembled
- * @return NULL when packet has not been completely assembled
- */
-packet_t *
-capture_packet_reasm_ip(capture_info_t *capinfo, const struct pcap_pkthdr *header,
-                        u_char *packet, uint32_t *size, uint32_t *caplen);
-
-/**
- * @brief Reassembly capture TCP segments
- *
- * This function will try to assemble TCP segments of an existing packet.
- *
- * @note We assume packets higher than MAX_CAPTURE_LEN won't be SIP. This has been
- * done to avoid reassembling too big packets, that aren't likely to be interesting
- * for sngrep.
- *
- * @param packet Capture packet structure
- * @param tcp TCP header extracted from capture packet data
- * @param payload Assembled TCP packet payload content
- * @param size_payload Payload length
- * @return a Packet structure when packet is not segmented or fully reassembled
- * @return NULL when packet has not been completely assembled
- */
-packet_t *
-capture_packet_reasm_tcp(packet_t *packet, struct tcphdr *tcp,
-                         u_char *payload, int size_payload);
-
-/**
- * @brief Check if given payload belongs to a Websocket connection
- *
- * Parse the given payload and determine if given payload could belong
- * to a Websocket packet. This function will change the payload pointer
- * apnd size content to point to the SIP payload data.
- *
- * @return 0 if packet is websocket, 1 otherwise
- */
-int
-capture_ws_check_packet(packet_t *packet);
 
 /**
  * @brief Check if the given packet structure is SIP/RTP/..
