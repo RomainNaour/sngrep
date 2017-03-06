@@ -20,37 +20,45 @@
  **
  ****************************************************************************/
 /**
- * @file packet_tcp.h
+ * @file capture_udp.c
  * @author Ivan Alonso [aka Kaian] <kaian@irontec.com>
  *
- * @brief Functions to manage TCP protocol
+ * @brief Source of functions defined in capture_udp.h
  *
+ * Support for UDP transport layer
  *
  */
-#ifndef __SNGREP_PACKET_TCP_H
-#define __SNGREP_PACKET_TCP_H
 
-/**
- * @brief Reassembly capture TCP segments
- *
- * This function will try to assemble TCP segments of an existing packet.
- *
- * @note We assume packets higher than MAX_CAPTURE_LEN won't be SIP. This has been
- * done to avoid reassembling too big packets, that aren't likely to be interesting
- * for sngrep.
- *
- * @param packet Capture packet structure
- * @param tcp TCP header extracted from capture packet data
- * @param payload Assembled TCP packet payload content
- * @param size_payload Payload length
- * @return a Packet structure when packet is not segmented or fully reassembled
- * @return NULL when packet has not been completely assembled
- */
-packet_t *
-capture_packet_reasm_tcp(packet_t *packet, struct tcphdr *tcp,
-                         u_char *payload, int size_payload);
+#include "config.h"
+#include "capture/capture.h"
+#include "util/util.h"
+#include "sip.h"
+#include "packet_udp.h"
 
 packet_t *
-parse_packet_tcp(packet_t *packet, u_char *data, int size_payload);
+parse_packet_udp(packet_t *packet, u_char *data, int size_payload)
+{
+    // UDP header data
+    struct udphdr *udp = (struct udphdr *) data;
+    // UDP header size
+    uint16_t udp_off = sizeof(struct udphdr);
 
-#endif
+    // Set packet ports
+    packet->src.port = htons(udp->uh_sport);
+    packet->dst.port = htons(udp->uh_dport);
+
+    // Remove UDP Header from payload
+    size_payload -= udp_off;
+
+    if ((int32_t)size_payload < 0)
+        size_payload = 0;
+
+    // Remove TCP Header from payload
+    u_char *payload = (u_char *) (udp) + udp_off;
+
+    // Complete packet with Transport information
+    packet_set_type(packet, PACKET_SIP_UDP);
+    packet_set_payload(packet, payload, size_payload);
+    return packet;
+}
+

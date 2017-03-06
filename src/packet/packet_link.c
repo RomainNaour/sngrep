@@ -20,37 +20,54 @@
  **
  ****************************************************************************/
 /**
- * @file packet_tcp.h
+ * @file packet_rtcp.c
  * @author Ivan Alonso [aka Kaian] <kaian@irontec.com>
  *
- * @brief Functions to manage TCP protocol
- *
- *
+ * @brief Source of functions defined in packet_link.h
  */
-#ifndef __SNGREP_PACKET_TCP_H
-#define __SNGREP_PACKET_TCP_H
 
-/**
- * @brief Reassembly capture TCP segments
- *
- * This function will try to assemble TCP segments of an existing packet.
- *
- * @note We assume packets higher than MAX_CAPTURE_LEN won't be SIP. This has been
- * done to avoid reassembling too big packets, that aren't likely to be interesting
- * for sngrep.
- *
- * @param packet Capture packet structure
- * @param tcp TCP header extracted from capture packet data
- * @param payload Assembled TCP packet payload content
- * @param size_payload Payload length
- * @return a Packet structure when packet is not segmented or fully reassembled
- * @return NULL when packet has not been completely assembled
- */
-packet_t *
-capture_packet_reasm_tcp(packet_t *packet, struct tcphdr *tcp,
-                         u_char *payload, int size_payload);
+#include <arpa/inet.h>
+#include <netinet/if_ether.h>
+#include <pcap.h>
+#include "packet_link.h"
 
-packet_t *
-parse_packet_tcp(packet_t *packet, u_char *data, int size_payload);
-
+int8_t
+packet_link_size(int linktype)
+{
+    // Datalink header size
+    switch (linktype) {
+        case DLT_EN10MB:
+            return 14;
+        case DLT_IEEE802:
+            return 22;
+        case DLT_LOOP:
+        case DLT_NULL:
+            return 4;
+        case DLT_SLIP:
+        case DLT_SLIP_BSDOS:
+            return 16;
+        case DLT_PPP:
+        case DLT_PPP_BSDOS:
+        case DLT_PPP_SERIAL:
+        case DLT_PPP_ETHER:
+            return 4;
+        case DLT_RAW:
+            return 0;
+        case DLT_FDDI:
+            return 21;
+        case DLT_ENC:
+            return 12;
+#ifdef DLT_LINUX_SLL
+        case DLT_LINUX_SLL:
+            return 16;
 #endif
+#ifdef DLT_IPNET
+        case DLT_IPNET:
+            return 24;
+#endif
+        default:
+            // Not handled datalink type
+            return -1;
+    }
+}
+

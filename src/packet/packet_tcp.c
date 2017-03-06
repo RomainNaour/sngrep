@@ -33,6 +33,8 @@
 #include "capture/capture.h"
 #include "util/util.h"
 #include "sip.h"
+#include "packet_ws.h"
+#include "packet_tcp.h"
 
 // Capture information
 extern capture_config_t capture_cfg;
@@ -134,5 +136,53 @@ capture_packet_reasm_tcp(packet_t *packet, struct tcphdr *tcp, u_char *payload, 
 
     // An incomplete SIP Packet
     return NULL;
+}
+
+packet_t *
+parse_packet_tcp(packet_t *packet, u_char *data, int size_payload)
+{
+    // TCP header data
+    struct tcphdr *tcp;
+    // TCP header size
+    uint16_t tcp_off;
+    // Packet payload data
+    u_char *payload = NULL;
+
+    // Get TCP header
+    tcp = (struct tcphdr *) data;
+    tcp_off = (tcp->th_off * 4);
+
+    // Set packet ports
+    packet->src.port = htons(tcp->th_sport);
+    packet->dst.port = htons(tcp->th_dport);
+
+    // Get actual payload size
+    size_payload -= tcp_off;
+
+    if ((int32_t)size_payload < 0)
+        size_payload = 0;
+
+    // Get payload start
+    payload = (u_char *)(tcp) + tcp_off;
+
+    // Complete packet with Transport information
+    packet_set_type(packet, PACKET_SIP_TCP);
+    packet_set_payload(packet, payload, size_payload);
+
+    // Create a structure for this captured packet
+    if (!(packet = capture_packet_reasm_tcp(packet, tcp, payload, size_payload)))
+        return NULL;
+
+#if defined(WITH_GNUTLS) || defined(WITH_OPENSSL)
+    // Check if packet is TLS
+    if (capture_cfg.keyfile) {
+        tls_process_segment(packet, tcp);
+    }
+#endif
+
+    // Check if packet is WS or WSS
+    capture_ws_check_packet(packet);
+
+    return packet;
 }
 

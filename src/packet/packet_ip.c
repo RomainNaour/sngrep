@@ -35,6 +35,8 @@
 #include <stdbool.h>
 #include "capture/capture.h"
 #include "util/util.h"
+#include "packet_link.h"
+#include "packet_ip.h"
 
 // Capture information
 extern capture_config_t capture_cfg;

@@ -72,7 +72,6 @@
 #include <netinet/if_ether.h>
 #include <netinet/ip.h>
 #include <netinet/tcp.h>
-#include <netinet/udp.h>
 #include <stdbool.h>
 #include "packet/packet.h"
 #include "util/vector.h"
@@ -81,11 +80,6 @@
 #define MAX_CAPTURE_LEN 20480
 //! Max allowed packet length
 #define MAXIMUM_SNAPLEN 262144
-
-//! Define VLAN 802.1Q Ethernet type
-#ifndef ETHERTYPE_8021Q
-#define ETHERTYPE_8021Q 0x8100
-#endif
 
 //! Capture modes
 enum capture_status {
@@ -360,13 +354,6 @@ capture_packet_time_sorter(vector_t *vector, void *item);
  */
 void
 capture_close();
-
-/**
- * @brief Get datalink header size
- *
- */
-int8_t
-datalink_size(int datalink);
 
 /**
  * @brief Open a new dumper file for capture handler

@@ -41,9 +41,10 @@
 #ifdef WITH_OPENSSL
 #include "packet/packet_tls_openssl.h"
 #endif
+#include "packet/packet_link.h"
 #include "packet/packet_ip.h"
 #include "packet/packet_tcp.h"
-#include "packet/packet_ws.h"
+#include "packet/packet_udp.h"
 #include "sip.h"
 #include "rtp.h"
 #include "setting.h"
@@ -139,7 +140,7 @@ capture_online(const char *dev, const char *outfile)
     capinfo->link = pcap_datalink(capinfo->handle);
 
     // Check linktypes sngrep knowns before start parsing packets
-    if ((capinfo->link_hl = datalink_size(capinfo->link)) == -1) {
+    if ((capinfo->link_hl = packet_link_size(capinfo->link)) == -1) {
         fprintf(stderr, "Unable to handle linktype %d\n", capinfo->link);
         return 3;
     }
@@ -189,7 +190,7 @@ capture_offline(const char *infile, const char *outfile)
     capinfo->link = pcap_datalink(capinfo->handle);
 
     // Check linktypes sngrep knowns before start parsing packets
-    if ((capinfo->link_hl = datalink_size(capinfo->link)) == -1) {
+    if ((capinfo->link_hl = packet_link_size(capinfo->link)) == -1) {
         fprintf(stderr, "Unable to handle linktype %d\n", capinfo->link);
         return 3;
     }
@@ -214,14 +215,6 @@ parse_packet(u_char *info, const struct pcap_pkthdr *header, const u_char *packe
 {
     // Capture info
     capture_info_t *capinfo = (capture_info_t *) info;
-    // UDP header data
-    struct udphdr *udp;
-    // UDP header size
-    uint16_t udp_off;
-    // TCP header data
-    struct tcphdr *tcp;
-    // TCP header size
-    uint16_t tcp_off;
     // Packet data
     u_char data[MAX_CAPTURE_LEN];
     // Packet payload data
@@ -258,64 +251,18 @@ parse_packet(u_char *info, const struct pcap_pkthdr *header, const u_char *packe
 
     // Only interested in UDP packets
     if (pkt->proto == IPPROTO_UDP) {
-        // Get UDP header
-        udp = (struct udphdr *)((u_char *)(data) + (size_capture - size_payload));
-        udp_off = sizeof(struct udphdr);
-
-        // Set packet ports
-        pkt->src.port = htons(udp->uh_sport);
-        pkt->dst.port = htons(udp->uh_dport);
-
-        // Remove UDP Header from payload
-        size_payload -= udp_off;
-
-        if ((int32_t)size_payload < 0)
-            size_payload = 0;
-
-        // Remove TCP Header from payload
-        payload = (u_char *) (udp) + udp_off;
-
-        // Complete packet with Transport information
-        packet_set_type(pkt, PACKET_SIP_UDP);
-        packet_set_payload(pkt, payload, size_payload);
-
+        // Get UDP data
+        pkt = parse_packet_udp(pkt, ((u_char *)(data) + (size_capture - size_payload)), size_payload);
     } else if (pkt->proto == IPPROTO_TCP) {
-        // Get TCP header
-        tcp = (struct tcphdr *)((u_char *)(data) + (size_capture - size_payload));
-        tcp_off = (tcp->th_off * 4);
-
-        // Set packet ports
-        pkt->src.port = htons(tcp->th_sport);
-        pkt->dst.port = htons(tcp->th_dport);
-
-        // Get actual payload size
-        size_payload -= tcp_off;
-
-        if ((int32_t)size_payload < 0)
-            size_payload = 0;
-
-        // Get payload start
-        payload = (u_char *)(tcp) + tcp_off;
-
-        // Complete packet with Transport information
-        packet_set_type(pkt, PACKET_SIP_TCP);
-        packet_set_payload(pkt, payload, size_payload);
-
-        // Create a structure for this captured packet
-        if (!(pkt = capture_packet_reasm_tcp(pkt, tcp, payload, size_payload)))
-            return;
-
-#if defined(WITH_GNUTLS) || defined(WITH_OPENSSL)
-        // Check if packet is TLS
-        if (capture_cfg.keyfile) {
-            tls_process_segment(pkt, tcp);
-        }
-#endif
-
-        // Check if packet is WS or WSS
-        capture_ws_check_packet(pkt);
+        // Get TCP data
+        pkt = parse_packet_tcp(pkt, ((u_char *)(data) + (size_capture - size_payload)), size_payload);
     } else {
         // Not handled protocol
+        packet_destroy(pkt);
+        return;
+    }
+
+    if (pkt == NULL) {
         packet_destroy(pkt);
         return;
     }
@@ -600,48 +547,6 @@ capture_packet_time_sorter(vector_t *vector, void *item)
 
     // Put this item at the begining of the vector
     vector_insert(vector, item, 0);
-}
-
-
-int8_t
-datalink_size(int datalink)
-{
-    // Datalink header size
-    switch (datalink) {
-        case DLT_EN10MB:
-            return 14;
-        case DLT_IEEE802:
-            return 22;
-        case DLT_LOOP:
-        case DLT_NULL:
-            return 4;
-        case DLT_SLIP:
-        case DLT_SLIP_BSDOS:
-            return 16;
-        case DLT_PPP:
-        case DLT_PPP_BSDOS:
-        case DLT_PPP_SERIAL:
-        case DLT_PPP_ETHER:
-            return 4;
-        case DLT_RAW:
-            return 0;
-        case DLT_FDDI:
-            return 21;
-        case DLT_ENC:
-            return 12;
-#ifdef DLT_LINUX_SLL
-        case DLT_LINUX_SLL:
-            return 16;
-#endif
-#ifdef DLT_IPNET
-        case DLT_IPNET:
-            return 24;
-#endif
-        default:
-            // Not handled datalink type
-            return -1;
-    }
-
 }
 
 pcap_dumper_t *

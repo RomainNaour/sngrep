@@ -20,37 +20,27 @@
  **
  ****************************************************************************/
 /**
- * @file packet_tcp.h
+ * @file packet_link.h
  * @author Ivan Alonso [aka Kaian] <kaian@irontec.com>
  *
- * @brief Functions to manage TCP protocol
- *
- *
+ * @brief Functions to link layer packet contents
  */
-#ifndef __SNGREP_PACKET_TCP_H
-#define __SNGREP_PACKET_TCP_H
 
-/**
- * @brief Reassembly capture TCP segments
- *
- * This function will try to assemble TCP segments of an existing packet.
- *
- * @note We assume packets higher than MAX_CAPTURE_LEN won't be SIP. This has been
- * done to avoid reassembling too big packets, that aren't likely to be interesting
- * for sngrep.
- *
- * @param packet Capture packet structure
- * @param tcp TCP header extracted from capture packet data
- * @param payload Assembled TCP packet payload content
- * @param size_payload Payload length
- * @return a Packet structure when packet is not segmented or fully reassembled
- * @return NULL when packet has not been completely assembled
- */
-packet_t *
-capture_packet_reasm_tcp(packet_t *packet, struct tcphdr *tcp,
-                         u_char *payload, int size_payload);
+#ifndef __SNGREP_PACKET_LINK_H_
+#define __SNGREP_PACKET_LINK_H_
 
-packet_t *
-parse_packet_tcp(packet_t *packet, u_char *data, int size_payload);
+#include <netinet/if_ether.h>
+#include <stdint.h>
 
+#include "util/buffer.h"
+#include "packet.h"
+
+//! Define VLAN 802.1Q Ethernet type
+#ifndef ETHERTYPE_8021Q
+#define ETHERTYPE_8021Q 0x8100
 #endif
+
+int8_t
+packet_link_size(int linktype);
+
+#endif /* __SNGREP_PACKET_LINK_H_ */

@@ -25,9 +25,11 @@ endif
 
 sngrep_SOURCES+=packet/address.c
 sngrep_SOURCES+=packet/packet.c
-sngrep_SOURCES+=packet/packet_ws.c
+sngrep_SOURCES+=packet/packet_link.c
 sngrep_SOURCES+=packet/packet_ip.c
 sngrep_SOURCES+=packet/packet_tcp.c
+sngrep_SOURCES+=packet/packet_udp.c
+sngrep_SOURCES+=packet/packet_ws.c
 sngrep_SOURCES+=sip.c
 sngrep_SOURCES+=sip_call.c
 sngrep_SOURCES+=sip_msg.c

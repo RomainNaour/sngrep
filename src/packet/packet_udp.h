@@ -20,37 +20,20 @@
  **
  ****************************************************************************/
 /**
- * @file packet_tcp.h
+ * @file packet_udp.h
  * @author Ivan Alonso [aka Kaian] <kaian@irontec.com>
  *
- * @brief Functions to manage TCP protocol
+ * @brief Functions to manage UDP protocol
  *
  *
  */
-#ifndef __SNGREP_PACKET_TCP_H
-#define __SNGREP_PACKET_TCP_H
+#ifndef __SNGREP_PACKET_UDP_H
+#define __SNGREP_PACKET_UDP_H
 
-/**
- * @brief Reassembly capture TCP segments
- *
- * This function will try to assemble TCP segments of an existing packet.
- *
- * @note We assume packets higher than MAX_CAPTURE_LEN won't be SIP. This has been
- * done to avoid reassembling too big packets, that aren't likely to be interesting
- * for sngrep.
- *
- * @param packet Capture packet structure
- * @param tcp TCP header extracted from capture packet data
- * @param payload Assembled TCP packet payload content
- * @param size_payload Payload length
- * @return a Packet structure when packet is not segmented or fully reassembled
- * @return NULL when packet has not been completely assembled
- */
-packet_t *
-capture_packet_reasm_tcp(packet_t *packet, struct tcphdr *tcp,
-                         u_char *payload, int size_payload);
+#include "capture/capture.h"
+#include <netinet/udp.h>
 
 packet_t *
-parse_packet_tcp(packet_t *packet, u_char *data, int size_payload);
+parse_packet_udp(packet_t *packet, u_char *data, int size_payload);
 
 #endif
