@@ -41,6 +41,7 @@
 #include <pcap.h>
 #include "address.h"
 #include "util/vector.h"
+#include "util/buffer.h"
 
 //! Stored packet types
 enum packet_type {
@@ -51,6 +52,26 @@ enum packet_type {
     PACKET_SIP_WSS,
     PACKET_RTP,
     PACKET_RTCP,
+};
+
+/**
+ * @brief Packet types
+ *
+ * Note that packet types are stored as flags and a packet have more than
+ * one type.
+ */
+enum packet_types {
+    PACKET_TYPE_IP = 0,
+    PACKET_TYPE_UDP,
+    PACKET_TYPE_TCP,
+    PACKET_TYPE_TLS,
+    PACKET_TYPE_WS,
+    PACKET_TYPE_SIP,
+    PACKET_TYPE_SDP,
+    PACKET_TYPE_RTP,
+    PACKET_TYPE_RTCP,
+    PACKET_TYPE_HEP,
+    PACKET_TYPE_COUNT,
 };
 
 //! Shorter declaration of packet structure
@@ -72,10 +93,6 @@ struct packet {
     uint8_t proto;
     //! Packet type as defined in capture_packet_type
     enum packet_type type;
-    //! Source
-    address_t src;
-    //! Destination
-    address_t dst;
     //! Packet IP id
     uint16_t ip_id;
     //! Packet IP fragmentation captured data
@@ -88,6 +105,26 @@ struct packet {
     u_char *payload;
     //! Payload length
     uint32_t payload_len;
+
+
+    //! Packet types (bit flags array)
+    uint16_t types;
+    //! Source address and port data
+    address_t src;
+    //! Destination address and port data
+    address_t dst;
+    //! Assembled/Decoded full packet payload
+    sng_buff_t content;
+    //! Depending on packet type
+    union {
+        //! SIP packet specific data
+        struct sip_pvt *sip;
+        //! RTP packet specific data
+        struct rtp_pvt *rtp;
+        //! RTCP packet specific data
+        struct rtcp_pvt *rtcp;
+    };
+
     //! Packet frame list (frame_t)
     vector_t *frames;
 };
@@ -178,5 +215,11 @@ packet_payload(packet_t *packet);
  */
 struct timeval
 packet_time(packet_t *packet);
+
+void
+packet_add_type(packet_t *packet, enum packet_types type);
+
+bool
+packet_has_type(packet_t *packet, enum packet_types type);
 
 #endif /* __SNGREP_CAPTURE_PACKET_H */

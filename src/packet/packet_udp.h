@@ -30,10 +30,10 @@
 #ifndef __SNGREP_PACKET_UDP_H
 #define __SNGREP_PACKET_UDP_H
 
-#include "capture/capture.h"
-#include <netinet/udp.h>
+#include "packet.h"
+#include "util/util.h"
 
-packet_t *
-parse_packet_udp(packet_t *packet, u_char *data, int size_payload);
+void
+packet_parse_udp(packet_t *packet, sng_buff_t data);
 
 #endif

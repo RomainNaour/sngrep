@@ -324,13 +324,13 @@ call_flow_draw_arrows(ui_t *ui)
         }
     }
     // Create pending RTP arrows
-    rtp_stream_t *stream = NULL;
-    while ((stream = call_group_get_next_stream(info->group, stream))) {
-        if (!call_flow_arrow_find(ui, stream)) {
-            arrow = call_flow_arrow_create(ui, stream, CF_ARROW_RTP);
-            vector_append(info->arrows, arrow);
-        }
-    }
+//    rtp_stream_t *stream = NULL;
+//    while ((stream = call_group_get_next_stream(info->group, stream))) {
+//        if (!call_flow_arrow_find(ui, stream)) {
+//            arrow = call_flow_arrow_create(ui, stream, CF_ARROW_RTP);
+//            vector_append(info->arrows, arrow);
+//        }
+//    }
 
     // Copy displayed arrows
     // vector_destroy(info->darrows);

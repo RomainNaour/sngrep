@@ -20,30 +20,49 @@
  **
  ****************************************************************************/
 /**
- * @file packet_link.h
+ * @file mem.h
  * @author Ivan Alonso [aka Kaian] <kaian@irontec.com>
  *
- * @brief Functions to link layer packet contents
+ * @brief Functions to manage memory pools
  */
 
-#ifndef __SNGREP_PACKET_LINK_H_
-#define __SNGREP_PACKET_LINK_H_
+#ifndef __SNGREP_MEM_H_
+#define __SNGREP_MEM_H_
 
-#include <netinet/if_ether.h>
-#include <stdint.h>
+#include <stdlib.h>
 
-#include "util/buffer.h"
-#include "packet.h"
+#define MALLOC_MAX_SIZE 102400
 
-//! Define VLAN 802.1Q Ethernet type
-#ifndef ETHERTYPE_8021Q
-#define ETHERTYPE_8021Q 0x8100
-#endif
+typedef struct mem_pool mem_pool_t;
+
+struct mem_pool
+{
+    size_t count;
+    void*
+    (*malloc)(size_t size);
+    void
+    (*free)(void *ptr);
+    void*
+    (*realloc)(void *ptr, size_t size);
+    // void* (*calloc)(size_t nmemb, size_t size);
+};
+
+mem_pool_t *
+sng_gmem_pool();
+
+void*
+sng_malloc(mem_pool_t *pool, size_t size);
 
 void
-packet_parse_link(packet_t *packet, sng_buff_t data, int linktype);
+sng_free(mem_pool_t *pool, void *ptr);
 
-int8_t
-packet_link_size(int linktype);
+void*
+sng_generic_malloc(size_t size);
 
-#endif /* __SNGREP_PACKET_LINK_H_ */
+void
+sng_generic_free(void *ptr);
+
+void*
+sng_generic_realloc(void *ptr, size_t size);
+
+#endif /* __SNGREP_MEM_H_ */

@@ -138,51 +138,63 @@ capture_packet_reasm_tcp(packet_t *packet, struct tcphdr *tcp, u_char *payload, 
     return NULL;
 }
 
-packet_t *
-parse_packet_tcp(packet_t *packet, u_char *data, int size_payload)
+void
+packet_parse_tcp(packet_t *packet, sng_buff_t data)
 {
-    // TCP header data
-    struct tcphdr *tcp;
-    // TCP header size
+    struct tcphdr *tcp = (struct tcphdr *) data.ptr;
     uint16_t tcp_off;
-    // Packet payload data
-    u_char *payload = NULL;
+    uint32_t tcp_seq;
 
-    // Get TCP header
-    tcp = (struct tcphdr *) data;
+#ifdef __FAVOR_BSD
     tcp_off = (tcp->th_off * 4);
-
-    // Set packet ports
+    tcp_seq = ntohl(tcp->th_seq);
     packet->src.port = htons(tcp->th_sport);
     packet->dst.port = htons(tcp->th_dport);
-
-    // Get actual payload size
-    size_payload -= tcp_off;
-
-    if ((int32_t)size_payload < 0)
-        size_payload = 0;
-
-    // Get payload start
-    payload = (u_char *)(tcp) + tcp_off;
-
-    // Complete packet with Transport information
-    packet_set_type(packet, PACKET_SIP_TCP);
-    packet_set_payload(packet, payload, size_payload);
-
-    // Create a structure for this captured packet
-    if (!(packet = capture_packet_reasm_tcp(packet, tcp, payload, size_payload)))
-        return NULL;
-
-#if defined(WITH_GNUTLS) || defined(WITH_OPENSSL)
-    // Check if packet is TLS
-    if (capture_cfg.keyfile) {
-        tls_process_segment(packet, tcp);
-    }
+#else
+    tcp_off = (tcp->doff * 4);
+    tcp_seq = ntohl(tcp->seq);
+    packet->src.port = htons(tcp->source);
+    packet->dst.port = htons(tcp->dest);
 #endif
 
-    // Check if packet is WS or WSS
-    capture_ws_check_packet(packet);
+    // Add TCP to the packet type list
+    packet_add_type(packet, PACKET_TYPE_TCP);
 
-    return packet;
+    // Get pending payload
+    data = sng_buff_shift(data, tcp_off);
+
+//  vector_iter_t it = vector_iterator(&tcp_reassembly);
+//  while ((pending = vector_iterator_next(&it))) {
+//      // Look for current TCP stream
+//        if (addressport_equals(pending->src, packet->src) &&
+//          addressport_equals(pending->dst, packet->dst)) {
+//
+//          // Add current packet to the stream
+//          packet = packet_tcp_reassemble(pending, packet);
+//          data = packet->payload;
+//          break;
+//        }
+//    }
+
+//  // First packet of the stream
+//  if (!pending) {
+//      packet->payload = data;
+//      vector_append(&tcp_reassembly, packet);
+//  }
+
+    // Check if this packet contains TLS
+    //packet_parse_tls(packet, data);
+
+    // Check if this packet contains RTCP
+    if (!packet_has_type(packet, PACKET_TYPE_TLS)) {
+        //packet_parse_ws(packet, data);
+    }
+
+    // Check if this packet contains SIP
+    if (!packet_has_type(packet, PACKET_TYPE_WS)) {
+        //packet_parse_sip(packet, data);
+    }
 }
+
+
 

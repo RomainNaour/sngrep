@@ -29,7 +29,34 @@
 #include <arpa/inet.h>
 #include <netinet/if_ether.h>
 #include <pcap.h>
+#include "packet_ip.h"
 #include "packet_link.h"
+
+
+void
+packet_parse_link(packet_t *packet, sng_buff_t data, int linktype)
+{
+    // Get Layer header size from link type
+    size_t offset = packet_link_size(linktype);
+
+    // For ethernet, skip VLAN header if present
+    if (linktype == DLT_EN10MB) {
+        struct ether_header *eth = (struct ether_header *) data.ptr;
+        if (ntohs(eth->ether_type) == ETHERTYPE_8021Q) {
+            offset += 4;
+        }
+    }
+
+    // Not enough data
+    if (data.len <= offset)
+        return;
+
+    // Update pending data
+    data = sng_buff_shift(data, offset);
+
+    // Try to parse next headers
+    packet_parse_ip(packet, data);
+}
 
 int8_t
 packet_link_size(int linktype)

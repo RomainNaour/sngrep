@@ -409,7 +409,7 @@ main(int argc, char* argv[])
     deinit_options();
 
     // Deallocate sip stored messages
-    sip_deinit();
+    //sip_deinit();
 
     // Leaving!
     return 0;

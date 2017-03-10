@@ -20,45 +20,40 @@
  **
  ****************************************************************************/
 /**
- * @file capture_udp.c
+ * @file packet_udp.c
  * @author Ivan Alonso [aka Kaian] <kaian@irontec.com>
  *
- * @brief Source of functions defined in capture_udp.h
+ * @brief Source of functions defined in packet_udp.h
  *
  * Support for UDP transport layer
  *
  */
-
 #include "config.h"
-#include "capture/capture.h"
-#include "util/util.h"
-#include "sip.h"
+#include <netinet/udp.h>
 #include "packet_udp.h"
 
-packet_t *
-parse_packet_udp(packet_t *packet, u_char *data, int size_payload)
+void
+packet_parse_udp(packet_t *packet, sng_buff_t data)
 {
-    // UDP header data
-    struct udphdr *udp = (struct udphdr *) data;
-    // UDP header size
+    struct udphdr *udp  = (struct udphdr *) data.ptr;
     uint16_t udp_off = sizeof(struct udphdr);
 
+    // Check payload can contain an UDP header
+    if (data.len < udp_off)
+        return;
+
     // Set packet ports
+#ifdef __FAVOR_BSD
     packet->src.port = htons(udp->uh_sport);
     packet->dst.port = htons(udp->uh_dport);
+#else
+    packet->src.port = htons(udp->source);
+    packet->dst.port = htons(udp->dest);
+#endif
 
-    // Remove UDP Header from payload
-    size_payload -= udp_off;
+    // Get pending payload
+    data = sng_buff_shift(data, udp_off);
+    packet_set_payload(packet, data.ptr, data.len);
 
-    if ((int32_t)size_payload < 0)
-        size_payload = 0;
-
-    // Remove TCP Header from payload
-    u_char *payload = (u_char *) (udp) + udp_off;
-
-    // Complete packet with Transport information
-    packet_set_type(packet, PACKET_SIP_UDP);
-    packet_set_payload(packet, payload, size_payload);
-    return packet;
 }
 

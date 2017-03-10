@@ -30,6 +30,25 @@
 #ifndef __SNGREP_PACKET_TCP_H
 #define __SNGREP_PACKET_TCP_H
 
+
+struct tcpstream
+{
+    vector_t packets;
+};
+
+struct priv_tcp
+{
+    //! Source port
+    uint16_t sport;
+    //! Destination port
+    uint16_t dport;
+    //! TCP sequence number
+    uint32_t seq;
+};
+
+void
+packet_parse_tcp(packet_t *packet, sng_buff_t data);
+
 /**
  * @brief Reassembly capture TCP segments
  *
@@ -49,8 +68,5 @@
 packet_t *
 capture_packet_reasm_tcp(packet_t *packet, struct tcphdr *tcp,
                          u_char *payload, int size_payload);
-
-packet_t *
-parse_packet_tcp(packet_t *packet, u_char *data, int size_payload);
 
 #endif

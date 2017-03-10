@@ -40,6 +40,48 @@
 #include "packet/packet.h"
 #include "util/vector.h"
 
+//! Shorter declaration of ip_frag_data structure
+typedef struct ip_frag_data ip_frag_data_t;
+
+//! @brief IP assembly data.
+struct ip_frag_data
+{
+    //! Packet IP addresses
+    address_t src, dst;
+    // IP version
+    uint32_t version;
+    // IP transport proto
+    uint8_t proto;
+    // IP header size
+    uint32_t hl;
+    // Fragment offset
+    uint16_t off;
+    // IP content len
+    uint16_t len;
+    // Fragmentation flag
+    uint16_t frag;
+    // Fragmentation identifier
+    uint32_t id;
+    // Fragmentation offset
+    uint16_t frag_off;
+    //! More fragments expected
+    uint16_t more;
+    //! Packet with this frame data
+    packet_t *packet;
+};
+
+void
+packet_parse_ip(packet_t *packet, sng_buff_t data);
+
+packet_t *
+packet_ip_reassembly(ip_frag_data_t *fragment);
+
+void
+packet_ip_reassembly_offset_sorter(vector_t *vector, void *item);
+
+void
+packet_ip_reassembly_remove(vector_t *fragments);
+
 /**
  * @brief Reassembly capture IP fragments
  *
@@ -65,8 +107,9 @@
  * @return a Packet structure when packet is not fragmented or fully reassembled
  * @return NULL when packet has not been completely assembled
  */
+/*
 packet_t *
 capture_packet_reasm_ip(capture_info_t *capinfo, const struct pcap_pkthdr *header,
                         u_char *packet, uint32_t *size, uint32_t *caplen);
-
+*/
 #endif

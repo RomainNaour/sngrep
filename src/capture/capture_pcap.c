@@ -22,7 +22,7 @@
 /**
  * @file capture.c
  * @author Ivan Alonso [aka Kaian] <kaian@irontec.com>
- *
+ *packet_parse_udp
  * @brief Source of functions defined in pcap.h
  *
  * sngrep can parse a pcap file to display call flows.
@@ -49,6 +49,7 @@
 #include "rtp.h"
 #include "setting.h"
 #include "util/util.h"
+#include "util/buffer.h"
 
 // Capture information
 capture_config_t capture_cfg =
@@ -140,7 +141,7 @@ capture_online(const char *dev, const char *outfile)
     capinfo->link = pcap_datalink(capinfo->handle);
 
     // Check linktypes sngrep knowns before start parsing packets
-    if ((capinfo->link_hl = packet_link_size(capinfo->link)) == -1) {
+    if (packet_link_size(capinfo->link) == -1) {
         fprintf(stderr, "Unable to handle linktype %d\n", capinfo->link);
         return 3;
     }
@@ -190,7 +191,7 @@ capture_offline(const char *infile, const char *outfile)
     capinfo->link = pcap_datalink(capinfo->handle);
 
     // Check linktypes sngrep knowns before start parsing packets
-    if ((capinfo->link_hl = packet_link_size(capinfo->link)) == -1) {
+    if (packet_link_size(capinfo->link) == -1) {
         fprintf(stderr, "Unable to handle linktype %d\n", capinfo->link);
         return 3;
     }
@@ -211,86 +212,42 @@ capture_offline(const char *infile, const char *outfile)
 }
 
 void
-parse_packet(u_char *info, const struct pcap_pkthdr *header, const u_char *packet)
+capture_pcap_parse_packet(u_char *info, const struct pcap_pkthdr *header, const u_char *content)
 {
-    // Capture info
+    packet_t *packet = sng_malloc(sizeof(packet_t));
     capture_info_t *capinfo = (capture_info_t *) info;
-    // Packet data
-    u_char data[MAX_CAPTURE_LEN];
-    // Packet payload data
-    u_char *payload = NULL;
-    // Whole packet size
-    uint32_t size_capture = header->caplen;
-    // Packet payload size
-    uint32_t size_payload =  size_capture - capinfo->link_hl;
-    // Captured packet info
-    packet_t *pkt;
 
-    // Ignore packets while capture is paused
-    if (capture_paused())
-        return;
 
-    // Check if we have reached capture limit
-    if (capture_cfg.limit && sip_calls_count() >= capture_cfg.limit) {
-        // If capture rotation is disabled, just skip this packet
-        if (!capture_cfg.rotate) {
-            return;
-        }
-    }
+    sng_buff_t data;
+    data.ptr = malloc(header->caplen);
+    memcpy(data.ptr, content, header->caplen);
+    data.len = header->caplen;
 
-    // Check maximum capture length
-    if (header->caplen > MAX_CAPTURE_LEN)
-        return;
-
-    // Copy packet payload
-    memcpy(data, packet, header->caplen);
-
-    // Check if we have a complete IP packet
-    if (!(pkt = capture_packet_reasm_ip(capinfo, header, data, &size_payload, &size_capture)))
-        return;
-
-    // Only interested in UDP packets
-    if (pkt->proto == IPPROTO_UDP) {
-        // Get UDP data
-        pkt = parse_packet_udp(pkt, ((u_char *)(data) + (size_capture - size_payload)), size_payload);
-    } else if (pkt->proto == IPPROTO_TCP) {
-        // Get TCP data
-        pkt = parse_packet_tcp(pkt, ((u_char *)(data) + (size_capture - size_payload)), size_payload);
-    } else {
-        // Not handled protocol
-        packet_destroy(pkt);
-        return;
-    }
-
-    if (pkt == NULL) {
-        packet_destroy(pkt);
-        return;
-    }
+    // Parse capture binary data
+    packet_parse_link(packet, data, capinfo->link);
 
     // Avoid parsing from multiples sources.
     // Avoid parsing while screen in being redrawn
     capture_lock();
     // Check if we can handle this packet
-    if (capture_packet_parse(pkt) == 0) {
+    if (capture_packet_parse(packet) == 0) {
 #ifdef USE_EEP
         // Send this packet through eep
-        capture_eep_send(pkt);
+        capture_eep_send(packet);
 #endif
         // Store this packets in output file
-        dump_packet(capture_cfg.pd, pkt);
+        dump_packet(capture_cfg.pd, packet);
         // If storage is disabled, delete frames payload
         if (capture_cfg.storage == 0) {
-            packet_free_frames(pkt);
+            packet_free_frames(packet);
         }
         // Allow Interface refresh and user input actions
         capture_unlock();
         return;
     }
-
-    // Not an interesting packet ...
-    packet_destroy(pkt);
     // Allow Interface refresh and user input actions
     capture_unlock();
+
 }
 
 int
@@ -371,7 +328,7 @@ capture_thread(void *info)
     capture_info_t *capinfo = (capture_info_t *) info;
 
     // Parse available packets
-    pcap_loop(capinfo->handle, -1, parse_packet, (u_char *) capinfo);
+    pcap_loop(capinfo->handle, -1, capture_pcap_parse_packet, (u_char *) capinfo);
 
     if (!capture_is_online())
         capture_cfg.status = CAPTURE_OFFLINE;

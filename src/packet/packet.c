@@ -176,3 +176,14 @@ packet_time(packet_t *packet)
     return ts;
 }
 
+void
+packet_add_type(packet_t *packet, enum packet_types type)
+{
+    packet->types |= type;
+}
+
+bool
+packet_has_type(packet_t *packet, enum packet_types type)
+{
+    return (packet->types & ( 1 << type))  != 0;
+}
