@@ -36,6 +36,7 @@
 #include "option.h"
 #include "setting.h"
 #include "filter.h"
+#include "packet/packet_sip.h"
 
 /**
  * @brief Linked list of parsed calls
@@ -48,11 +49,11 @@ sip_call_list_t calls =
 
 /* @brief list of methods and responses */
 sip_code_t sip_codes[] = {
-    { SIP_METHOD_REGISTER,  "REGISTER" },
-    { SIP_METHOD_INVITE,    "INVITE" },
+    { SIP_METHOD_REGISTER,  "REGISTER"  },
+    { SIP_METHOD_INVITE,    "INVITE"    },
     { SIP_METHOD_SUBSCRIBE, "SUBSCRIBE" },
-    { SIP_METHOD_NOTIFY,    "NOTIFY" },
-    { SIP_METHOD_OPTIONS,   "OPTIONS" },
+    { SIP_METHOD_NOTIFY,    "NOTIFY"    },
+    { SIP_METHOD_OPTIONS,   "OPTIONS"   },
     { SIP_METHOD_PUBLISH,   "PUBLISH" },
     { SIP_METHOD_MESSAGE,   "MESSAGE" },
     { SIP_METHOD_CANCEL,    "CANCEL" },
@@ -306,57 +307,36 @@ sip_check_packet(packet_t *packet)
     u_char payload[MAX_SIP_PAYLOAD];
     bool newcall = false;
 
-    // Max SIP payload allowed
-    if (packet->payload_len > MAX_SIP_PAYLOAD)
-        return NULL;
-
     // Get Addresses from packet
     src = packet->src;
     dst = packet->dst;
-
-    // Initialize local variables
-    memset(callid, 0, sizeof(callid));
-    memset(xcallid, 0, sizeof(xcallid));
 
     // Get payload from packet(s)
     memset(payload, 0, MAX_SIP_PAYLOAD);
     memcpy(payload, packet_payload(packet), packet_payloadlen(packet));
 
-    // Get the Call-ID of this message
-    if (!sip_get_callid((const char*) payload, callid))
-        return NULL;
-
     // Create a new message from this data
     if (!(msg = msg_create((const char*) payload)))
         return NULL;
 
-    // Get Method and request for the following checks
-    // There is no need to parse all payload at this point
-    // If no response or request code is found, this is not a SIP message
-    if (!sip_get_msg_reqresp(msg, payload)) {
-        // Deallocate message memory
-        msg_destroy(msg);
-        return NULL;
-    }
-
     // Find the call for this msg
-    if (!(call = sip_find_by_callid(callid))) {
+    if (!(call = sip_find_by_callid(packet->sip->callid))) {
 
         // Check if payload matches expression
         if (!sip_check_match_expression((const char*) payload))
             goto skip_message;
 
         // User requested only INVITE starting dialogs
-        if (calls.only_calls && msg->reqresp != SIP_METHOD_INVITE)
+        if (calls.only_calls && packet->sip->request.method != SIP_METHOD_INVITE)
             goto skip_message;
 
         // Only create a new call if the first msg
         // is a request message in the following gorup
-        if (calls.ignore_incomplete && msg->reqresp > SIP_METHOD_MESSAGE)
+        if (calls.ignore_incomplete && !packet->sip->isrequest)
             goto skip_message;
 
         // Get the Call-ID of this message
-        sip_get_xcallid((const char*) payload, xcallid);
+        //sip_get_xcallid((const char*) payload, xcallid);
 
         // Rotate call list if limit has been reached
         if (calls.limit == sip_calls_count())
@@ -367,7 +347,7 @@ sip_check_packet(packet_t *packet)
             goto skip_message;
 
         // Add this Call-Id to hash table
-        htable_insert(calls.callids, call->callid, call);
+        htable_insert(calls.callids, packet->sip->callid, call);
 
         // Set call index
         call->index = ++calls.last_index;
@@ -380,14 +360,14 @@ sip_check_packet(packet_t *packet)
     msg->packet = packet;
 
     // Always parse first call message
-    if (call_msg_count(call) == 0) {
-        // Parse SIP payload
-        sip_parse_msg_payload(msg, payload);
-        // If this call has X-Call-Id, append it to the parent call
-        if (strlen(call->xcallid)) {
-            call_add_xcall(sip_find_by_callid(call->xcallid), call);
-        }
-    }
+//    if (call_msg_count(call) == 0) {
+//        // Parse SIP payload
+//        sip_parse_msg_payload(msg, payload);
+//        // If this call has X-Call-Id, append it to the parent call
+//        if (strlen(call->xcallid)) {
+//            call_add_xcall(sip_find_by_callid(call->xcallid), call);
+//        }
+//    }
 
     // Add the message to the call
     call_add_message(call, msg);
@@ -491,7 +471,7 @@ sip_find_by_index(int index)
 }
 
 sip_call_t *
-sip_find_by_callid(const char *callid)
+sip_find_by_callid(sng_str_t callid)
 {
     return htable_find(calls.callids, callid);
 }
@@ -738,7 +718,7 @@ sip_calls_rotate()
     while ((call = vector_iterator_next(&it))) {
         if (!call->locked) {
             // Remove from callids hash
-            htable_remove(calls.callids, call->callid);
+            //FIXME htable_remove(calls.callids, call->callid);
             // Remove first call from active and call lists
             vector_remove(calls.active, call);
             vector_remove(calls.list, call);

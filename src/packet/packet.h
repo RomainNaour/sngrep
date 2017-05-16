@@ -101,10 +101,6 @@ struct packet {
     uint32_t ip_exp_len;
     //! Last TCP sequence frame
     uint32_t tcp_seq;
-    //! PCAP Packet payload when it can not be get from data
-    u_char *payload;
-    //! Payload length
-    uint32_t payload_len;
 
 
     //! Packet types (bit flags array)
@@ -221,5 +217,11 @@ packet_add_type(packet_t *packet, enum packet_types type);
 
 bool
 packet_has_type(packet_t *packet, enum packet_types type);
+
+void
+packet_dump(packet_t *packet, char *title);
+
+void
+packet_dump_hex(char *desc, const void *ptr, int len);
 
 #endif /* __SNGREP_CAPTURE_PACKET_H */

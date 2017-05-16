@@ -30,9 +30,9 @@
 #include <string.h>
 #include <stdlib.h>
 #include <form.h>
-#include "ui_manager.h"
-#include "ui_filter.h"
-#include "ui_call_list.h"
+#include "curses/ui_manager.h"
+#include "curses/panels/ui_filter.h"
+#include "curses/panels/ui_call_list.h"
 #include "sip.h"
 #include "filter.h"
 #include "setting.h"

@@ -28,7 +28,7 @@
  */
 #include <stdlib.h>
 #include <string.h>
-#include "ui_msg_diff.h"
+#include "curses/panels/ui_msg_diff.h"
 #include "option.h"
 
 /***

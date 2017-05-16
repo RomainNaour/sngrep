@@ -62,4 +62,10 @@ sng_str_cut(sng_str_t str, const char *where);
 sng_str_t
 sng_str_chomp(sng_str_t str);
 
+int
+sng_str_cmp(sng_str_t s1, sng_str_t s2);
+
+const char *
+sngstr(sng_str_t str);
+
 #endif /* __SNGREP_BUFFER_H */

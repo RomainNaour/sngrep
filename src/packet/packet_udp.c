@@ -53,7 +53,18 @@ packet_parse_udp(packet_t *packet, sng_buff_t data)
 
     // Get pending payload
     data = sng_buff_shift(data, udp_off);
-    packet_set_payload(packet, data.ptr, data.len);
 
+    // Check if this packet contains RTP
+    packet_parse_rtp(packet, data);
+
+    // Check if this packet contains RTCP
+    if (!packet_has_type(packet, PACKET_TYPE_RTP)) {
+        packet_parse_rtcp(packet, data);
+    }
+
+    // Check if this packet contains SIP
+    if (!packet_has_type(packet, PACKET_TYPE_RTCP)) {
+        packet_parse_sip(packet, data);
+    }
 }
 

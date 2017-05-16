@@ -126,23 +126,19 @@ msg_get_attribute(sip_msg_t *msg, int id, char *value)
             sprintf(value, "%s:%u", msg->packet->dst.ip, msg->packet->dst.port);
             break;
         case SIP_ATTR_METHOD:
-            sprintf(value, "%.*s", SIP_ATTR_MAXLEN, sip_get_msg_reqresp_str(msg));
+            sprintf(value, "%.*s", msg->packet->sip->request.text.len, msg->packet->sip->request.text.ptr);
             break;
         case SIP_ATTR_SIPFROM:
-            sprintf(value, "%.*s", SIP_ATTR_MAXLEN, msg->sip_from);
+            sprintf(value, "%.*s", msg->packet->sip->from.len, msg->packet->sip->from.ptr);
             break;
         case SIP_ATTR_SIPTO:
-            sprintf(value, "%.*s", SIP_ATTR_MAXLEN, msg->sip_to);
+            sprintf(value, "%.*s", msg->packet->sip->to.len, msg->packet->sip->to.ptr);
             break;
         case SIP_ATTR_SIPFROMUSER:
-            sprintf(value, "%.*s", SIP_ATTR_MAXLEN, msg->sip_from);
-            if ((ar = strchr(value, '@')))
-                *ar = '\0';
+            sprintf(value, "%.*s", msg->packet->sip->fromuser.len, msg->packet->sip->fromuser.ptr);
             break;
         case SIP_ATTR_SIPTOUSER:
-            sprintf(value, "%.*s", SIP_ATTR_MAXLEN, msg->sip_to);
-            if ((ar = strchr(value, '@')))
-                *ar = '\0';
+            sprintf(value, "%.*s", msg->packet->sip->touser.len, msg->packet->sip->touser.ptr);
             break;
         case SIP_ATTR_DATE:
             timeval_to_date(msg_get_time(msg), value);

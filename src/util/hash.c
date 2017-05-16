@@ -62,7 +62,7 @@ htable_destroy(htable_t *table)
 }
 
 int
-htable_insert(htable_t *table, const char *key, void *data)
+htable_insert(htable_t *table, sng_str_t key, void *data)
 {
     // Get hash position for given entry
     size_t pos = htable_hash(table, key);
@@ -91,7 +91,7 @@ htable_insert(htable_t *table, const char *key, void *data)
 }
 
 void
-htable_remove(htable_t *table, const char *key)
+htable_remove(htable_t *table, sng_str_t key)
 {
     // Get hash position for given entry
     size_t pos = htable_hash(table, key);
@@ -99,7 +99,7 @@ htable_remove(htable_t *table, const char *key)
     // Check if the hash position is in use
     hentry_t *entry, *prev = NULL;
     for (entry = table->buckets[pos]; entry; prev = entry, entry = entry->next) {
-        if (!strcmp(entry->key, key)) {
+        if (!sng_str_cmp(entry->key, key)) {
             if (prev) {
                 prev->next = entry->next;
             } else {
@@ -112,7 +112,7 @@ htable_remove(htable_t *table, const char *key)
 }
 
 void *
-htable_find(htable_t *table, const char *key)
+htable_find(htable_t *table, sng_str_t key)
 {
     // Get hash position for given entry
     size_t pos = htable_hash(table, key);
@@ -120,7 +120,7 @@ htable_find(htable_t *table, const char *key)
     // Check if the hash position is in use
     hentry_t *entry;
     for (entry = table->buckets[pos]; entry; entry = entry->next) {
-        if (!strcmp(entry->key, key)) {
+        if (!sng_str_cmp(entry->key, key)) {
             //! Found
             return entry->data;
         }
@@ -131,12 +131,14 @@ htable_find(htable_t *table, const char *key)
 }
 
 size_t
-htable_hash(htable_t *table, const char *key)
+htable_hash(htable_t *table, sng_str_t key)
 {
     // dbj2 - http://www.cse.yorku.ca/~oz/hash.html
     size_t hash = 5381;
-    while (*key++) {
-        hash = ((hash << 5) + hash) ^ *key;
+    int i = 0;
+
+    for (i = 0; i < key.len; i++) {
+        hash = ((hash << 5) + hash) ^ key.ptr[i];
     }
     return hash & (table->size - 1);
 }

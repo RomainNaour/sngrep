@@ -78,7 +78,7 @@ capture_packet_reasm_tcp(packet_t *packet, struct tcphdr *tcp, u_char *payload, 
     if (pkt->tcp_seq == 0) {
         pkt->tcp_seq = ntohl(tcp->th_seq);
     }
-
+/*
     // If the first frame of this packet
     if (vector_count(pkt->frames) == 1) {
         // Set initial payload
@@ -133,7 +133,7 @@ capture_packet_reasm_tcp(packet_t *packet, struct tcphdr *tcp, u_char *payload, 
             return pkt;
         }
     }
-
+*/
     // An incomplete SIP Packet
     return NULL;
 }

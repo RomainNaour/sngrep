@@ -33,6 +33,7 @@
 #include <stdarg.h>
 #include <stdbool.h>
 #include "util/vector.h"
+#include "packet/packet_sip.h"
 #include "rtp.h"
 #include "sip_msg.h"
 #include "sip_attr.h"

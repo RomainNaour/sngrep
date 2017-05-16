@@ -56,8 +56,8 @@
 #include "config.h"
 #include "util/vector.h"
 #include "sip.h"
-#include "ui_manager.h"
-#include "ui_stats.h"
+#include "curses/ui_manager.h"
+#include "curses/panels/ui_stats.h"
 
 /**
  * Ui Structure definition for Stats panel

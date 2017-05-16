@@ -214,40 +214,20 @@ capture_offline(const char *infile, const char *outfile)
 void
 capture_pcap_parse_packet(u_char *info, const struct pcap_pkthdr *header, const u_char *content)
 {
-    packet_t *packet = sng_malloc(sizeof(packet_t));
     capture_info_t *capinfo = (capture_info_t *) info;
 
+    packet_t *packet = sng_malloc(sizeof(packet_t));
 
     sng_buff_t data;
     data.ptr = malloc(header->caplen);
     memcpy(data.ptr, content, header->caplen);
     data.len = header->caplen;
 
+    packet->frames = vector_create(1, 1);
+    packet_add_frame(packet, header, data.ptr);
+
     // Parse capture binary data
     packet_parse_link(packet, data, capinfo->link);
-
-    // Avoid parsing from multiples sources.
-    // Avoid parsing while screen in being redrawn
-    capture_lock();
-    // Check if we can handle this packet
-    if (capture_packet_parse(packet) == 0) {
-#ifdef USE_EEP
-        // Send this packet through eep
-        capture_eep_send(packet);
-#endif
-        // Store this packets in output file
-        dump_packet(capture_cfg.pd, packet);
-        // If storage is disabled, delete frames payload
-        if (capture_cfg.storage == 0) {
-            packet_free_frames(packet);
-        }
-        // Allow Interface refresh and user input actions
-        capture_unlock();
-        return;
-    }
-    // Allow Interface refresh and user input actions
-    capture_unlock();
-
 }
 
 int
@@ -255,7 +235,6 @@ capture_packet_parse(packet_t *packet)
 {
     // Media structure for RTP packets
     rtp_stream_t *stream;
-
     // We're only interested in packets with payload
     if (packet_payloadlen(packet)) {
         // Parse this header and payload

@@ -83,14 +83,14 @@ sng_str_cut(sng_str_t str, const char *needle)
     //	if (found) ret.len = found - ret.ptr ;
     //	return ret;
 
-		char haystack[str.len + 1];
-		memset(haystack, 0, str.len + 1);
-		strncpy(haystack, str.ptr, str.len);
+    char haystack[str.len + 1];
+    memset(haystack, 0, str.len + 1);
+    strncpy(haystack, str.ptr, str.len);
 
-		sng_str_t ret = str;
-		const char *found = strstr(haystack, needle);
-		if (found) ret.len = found - haystack ;
-		return ret;
+    sng_str_t ret = str;
+    const char *found = strstr(haystack, needle);
+    if (found) ret.len = found - haystack ;
+    return ret;
 	//}
 }
 
@@ -116,4 +116,21 @@ sng_str_chomp(sng_str_t str)
 	}
 
 	return ret;
+}
+
+int
+sng_str_cmp(sng_str_t s1, sng_str_t s2)
+{
+    if (s1.len > s2.len) return 1;
+    if (s1.len < s2.len) return -1;
+    return strncmp(s1.ptr, s2.ptr, s2.len);
+}
+
+const char *
+sngstr(sng_str_t str)
+{
+    static char ret[1024];
+    strncpy(ret, str.ptr, str.len);
+    ret[str.len] = '\0';
+    return ret;
 }

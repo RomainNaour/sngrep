@@ -30,11 +30,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include "capture/capture.h"
-#include "ui_manager.h"
-#include "ui_call_flow.h"
-#include "ui_call_raw.h"
-#include "ui_msg_diff.h"
-#include "ui_save.h"
+#include "curses/ui_manager.h"
+#include "curses/panels/ui_call_flow.h"
+#include "curses/panels/ui_call_raw.h"
+#include "curses/panels/ui_msg_diff.h"
+#include "curses/panels/ui_save.h"
 #include "util/util.h"
 #include "util/vector.h"
 #include "option.h"

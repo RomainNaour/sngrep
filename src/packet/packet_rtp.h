@@ -20,58 +20,46 @@
  **
  ****************************************************************************/
 /**
- * @file hash.h
+ * @file packet_rtp.h
  * @author Ivan Alonso [aka Kaian] <kaian@irontec.com>
  *
- * @brief Functions to manage hash tables
+ * @brief Functions to manage RTP packets
+ *
  */
 
-#ifndef __SNGREP_HASH_H_
-#define __SNGREP_HASH_H_
+#ifndef __SNGREP_PACKET_RTP_H
+#define __SNGREP_PACKET_RTP_H
 
-#include "config.h"
-#include <stdio.h>
-#include "buffer.h"
+#include "util/buffer.h"
+#include "packet.h"
 
-//! Shorter declaration of hash structures
-typedef struct htable htable_t;
-typedef struct hentry hentry_t;
+// Version is the first 2 bits of the first octet
+#define RTP_VERSION(octet) ((octet) >> 6)
+// Payload type is the last 7 bits
+#define RTP_PAYLOAD_TYPE(octet) ((octet) & 0x7F)
+// Handled RTP versions
+#define RTP_VERSION_RFC1889 2
+// RTP header length
+#define RTP_HDR_LENGTH 12
 
-/**
- *  Structure to hold a Hash table entry
- */
-struct hentry {
-    //! Key of the hash entry
-    sng_str_t key;
-    //! Pointer to has entry data
-    void *data;
-    //! Next entry sharing the same hash value
-    hentry_t *next;
+//! Shorter declaration of rtp_encoding structure
+typedef struct rtp_encoding rtp_encoding_t;
+
+//! Struct to store well-known RTP formats
+struct rtp_encoding {
+    const u_char id;
+    const char *name;
+    const char *format;
 };
 
-struct htable {
-    //! Fixed hash table limit
-    size_t size;
-    // Hash table entries
-    hentry_t **buckets;
+//! Packet RTP information
+struct rtp_pvt {
+    //! Packet payload type
+    u_char ptype;
 };
 
-htable_t *
-htable_create(size_t size);
-
 void
-htable_destroy(htable_t *table);
+packet_parse_rtp(packet_t *packet, sng_buff_t data);
 
-int
-htable_insert(htable_t *table, sng_str_t key, void *data);
 
-void
-htable_remove(htable_t *table, sng_str_t key);
-
-void *
-htable_find(htable_t *table, sng_str_t key);
-
-size_t
-htable_hash(htable_t *table, sng_str_t key);
-
-#endif /* __SNGREP_HASH_H_ */
+#endif /* __SNGREP_PACKET_RTP_H */

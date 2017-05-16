@@ -30,6 +30,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "packet.h"
+#include "packet_sip.h"
 
 packet_t *
 packet_create(uint8_t ip_ver, uint8_t proto, address_t src, address_t dst, uint32_t id)
@@ -83,7 +84,6 @@ packet_destroy(packet_t *packet)
     // TODO Free remaining packet data
     vector_set_destroyer(packet->frames, vector_generic_destroyer);
     vector_destroy(packet->frames);
-    free(packet->payload);
     free(packet);
 }
 
@@ -135,29 +135,22 @@ void
 packet_set_payload(packet_t *packet, u_char *payload, uint32_t payload_len)
 {
     // Free previous payload
-    if (packet->payload)
-        free(packet->payload);
-    packet->payload_len = 0;
-
-    // Set new payload
-    if (payload) {
-        packet->payload = malloc(payload_len + 1);
-        memset(packet->payload, 0, payload_len + 1);
-        memcpy(packet->payload, payload, payload_len);
-        packet->payload_len = payload_len;
-    }
+    packet->content.ptr = payload;
+    packet->content.len = payload_len;
 }
 
 uint32_t
 packet_payloadlen(packet_t *packet)
 {
-    return packet->payload_len;
+    //return packet->payload_len;
+    return packet->content.len;
 }
 
 u_char *
 packet_payload(packet_t *packet)
 {
-    return packet->payload;
+    //return packet->payload;
+    return packet->content.ptr;
 }
 
 struct timeval
@@ -186,4 +179,45 @@ bool
 packet_has_type(packet_t *packet, enum packet_types type)
 {
     return (packet->types & ( 1 << type))  != 0;
+}
+
+void
+packet_dump(packet_t *packet, char *title)
+{
+    return;
+    address_t src = packet->src;
+    address_t dst = packet->dst;
+
+    printf("[%s] %s:%u -> %s:%u\n", title,
+           src.ip, src.port, dst.ip, dst.port);
+}
+
+void
+packet_dump_hex(char *desc, const void *ptr, int len)
+{
+    return;
+    int i;
+    uint8_t buff[17];
+    uint8_t *data = (uint8_t*)ptr;
+
+    printf ("%s [%d]:\n", desc, len);
+    if (len == 0) return;
+    for (i = 0; i < len; i++) {
+        if ((i % 16) == 0) {
+            if (i != 0)
+                printf (" |%s|\n", buff);
+            printf ("|");
+        }
+        printf (" %02x", data[i]);
+        if ((data[i] < 0x20) || (data[i] > 0x7e))
+            buff[i % 16] = '.';
+        else
+            buff[i % 16] = data[i];
+        buff[(i % 16) + 1] = '\0';
+    }
+    while ((i % 16) != 0) {
+        printf ("   ");
+        i++;
+    }
+    printf (" |%-16s|\n\n", buff);
 }

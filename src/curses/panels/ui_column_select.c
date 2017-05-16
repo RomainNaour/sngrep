@@ -31,9 +31,9 @@
 #include <regex.h>
 #include <unistd.h>
 #include <errno.h>
-#include "ui_manager.h"
-#include "ui_call_list.h"
-#include "ui_column_select.h"
+#include "curses/ui_manager.h"
+#include "curses/panels/ui_call_list.h"
+#include "curses/panels/ui_column_select.h"
 
 /**
  * Ui Structure definition for Message Diff panel

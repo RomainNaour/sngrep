@@ -60,7 +60,7 @@ call_create(char *callid, char *xcallid)
     call->xcalls = vector_create(0, 1);
 
     // Initialize call filter status
-    call->filtered = -1;
+    call->filtered = 0;
 
     // Set message callid
     call->callid = strdup(callid);
@@ -145,7 +145,7 @@ call_is_invite(sip_call_t *call)
 {
     sip_msg_t *first;
     if ((first = vector_first(call->msgs)))
-        return (first->reqresp == SIP_METHOD_INVITE);
+        return (first->packet->sip->request.method == SIP_METHOD_INVITE);
 
     return 0;
 }

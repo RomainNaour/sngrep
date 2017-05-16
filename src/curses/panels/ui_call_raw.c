@@ -31,9 +31,9 @@
  */
 #include <string.h>
 #include <stdlib.h>
-#include "ui_manager.h"
-#include "ui_call_raw.h"
-#include "ui_save.h"
+#include "curses/ui_manager.h"
+#include "curses/panels/ui_call_raw.h"
+#include "curses/panels/ui_save.h"
 #include "capture/capture.h"
 
 /**

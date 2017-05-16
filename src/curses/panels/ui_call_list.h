@@ -32,9 +32,9 @@
 #ifndef __UI_CALL_LIST_H
 #define __UI_CALL_LIST_H
 
-#include "ui_manager.h"
 #include <menu.h>
-#include "scrollbar.h"
+#include "curses/ui_manager.h"
+#include "curses/scrollbar.h"
 
 /**
  * @brief Enum of available fields

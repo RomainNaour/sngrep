@@ -53,24 +53,6 @@ typedef struct sip_stats sip_stats_t;
 //! Shorter declaration of sip sort
 typedef struct sip_sort sip_sort_t;
 
-//! SIP Methods
-enum sip_methods {
-    SIP_METHOD_REGISTER = 1,
-    SIP_METHOD_INVITE,
-    SIP_METHOD_SUBSCRIBE,
-    SIP_METHOD_NOTIFY,
-    SIP_METHOD_OPTIONS,
-    SIP_METHOD_PUBLISH,
-    SIP_METHOD_MESSAGE,
-    SIP_METHOD_CANCEL,
-    SIP_METHOD_BYE,
-    SIP_METHOD_ACK,
-    SIP_METHOD_PRACK,
-    SIP_METHOD_INFO,
-    SIP_METHOD_REFER,
-    SIP_METHOD_UPDATE,
-};
-
 //! Return values for sip_validate_packet
 enum validate_result {
     VALIDATE_NOT_SIP        = -1,
@@ -310,7 +292,7 @@ sip_find_by_index(int index);
  * @return pointer to the sip_call structure found or NULL
  */
 sip_call_t *
-sip_find_by_callid(const char *callid);
+sip_find_by_callid(sng_str_t callid);
 
 
 /**

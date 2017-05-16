@@ -20,58 +20,22 @@
  **
  ****************************************************************************/
 /**
- * @file hash.h
+ * @file packet_sdp.h
  * @author Ivan Alonso [aka Kaian] <kaian@irontec.com>
  *
- * @brief Functions to manage hash tables
+ * @brief Funtions to manage SDP protocol
  */
 
-#ifndef __SNGREP_HASH_H_
-#define __SNGREP_HASH_H_
+#ifndef PACKET_PACKET_SDP_H_
+#define PACKET_PACKET_SDP_H_
 
-#include "config.h"
-#include <stdio.h>
-#include "buffer.h"
+#include "util/vector.h"
 
-//! Shorter declaration of hash structures
-typedef struct htable htable_t;
-typedef struct hentry hentry_t;
+struct sdp_pvt
+{
+    vector_t *medias;
 
-/**
- *  Structure to hold a Hash table entry
- */
-struct hentry {
-    //! Key of the hash entry
-    sng_str_t key;
-    //! Pointer to has entry data
-    void *data;
-    //! Next entry sharing the same hash value
-    hentry_t *next;
 };
 
-struct htable {
-    //! Fixed hash table limit
-    size_t size;
-    // Hash table entries
-    hentry_t **buckets;
-};
 
-htable_t *
-htable_create(size_t size);
-
-void
-htable_destroy(htable_t *table);
-
-int
-htable_insert(htable_t *table, sng_str_t key, void *data);
-
-void
-htable_remove(htable_t *table, sng_str_t key);
-
-void *
-htable_find(htable_t *table, sng_str_t key);
-
-size_t
-htable_hash(htable_t *table, sng_str_t key);
-
-#endif /* __SNGREP_HASH_H_ */
+#endif /* PACKET_PACKET_SDP_H_ */

@@ -29,7 +29,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "sip.h"
-#include "curses/ui_call_list.h"
+#include "curses/panels/ui_call_list.h"
 #include "filter.h"
 
 //! Storage of filter information
